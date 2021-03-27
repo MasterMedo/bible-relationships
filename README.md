@@ -38,23 +38,23 @@ He had twelve sons, all of whom became the heads of their own family groups, lat
 ```cypher
 MATCH ({name: "Jacob_1"})<-[{type: "son"}]-(son)
 match path = (son)-[* bfs (e, v | e.type = "father")]->(a)
-return son.name AS tribe, count(a) AS family_size
+return son.name AS tribe, count(a) + 1 AS family_size
 ORDER BY family_size DESC
 ```
 | tribe | family_size |
 | -------- | --- |
-| Judah    | 162 |
-| Levi     | 109 |
-| Benjamin | 100 |
-| Joseph   |  48 |
-| Asher    |  40 |
-| Issachar |  16 |
-| Simeon   |  14 |
-| Reuben   |   8 |
-| Gad      |   7 |
-| Naphtali |   4 |
-| Zebulun  |   3 |
-| Dan      |   1 |
+| Judah    | 163 |
+| Levi     | 110 |
+| Benjamin | 101 |
+| Joseph   |  49 |
+| Asher    |  41 |
+| Issachar |  17 |
+| Simeon   |  15 |
+| Reuben   |   9 |
+| Gad      |   8 |
+| Naphtali |   5 |
+| Zebulun  |   4 |
+| Dan      |   2 |
 
 ```cypher
 MATCH ({name: "Jacob_1"})<-[{type: "son"}]-(son)
@@ -62,6 +62,8 @@ MATCH path = (son)-[* bfs (e, v | e.type = "father")]->(a)
 RETURN path
 ```
 ![](./img/tribes-of-israel.png)
+Can you guess which family tree belongs to whom?
+Help yourself with the table provided above!
 
 # From idea to results
 
@@ -157,3 +159,6 @@ SET new_relationship.type="created by";
 If you have read the bible some things might come out to you as odd straight away.
 For example, when I was executing the queries in the first part of the article I noticed that *Benjamin* was the son of *Joseph* and *Rachel*, but I know that can't be right since *Joseph* is the brother of *Benjamin*.
 Also, I have noticed that *Nahshon_1* and *Nahshon_2* must be the same person as there was no clear bloodline from *Adam* to *David*!
+In general for these kinds of observations you will usually need someone who is an expert in the field.
+These methods won't work well if the number of entries is too big.
+In those cases you'll have to accept small discrepancies between the data and the truth.
