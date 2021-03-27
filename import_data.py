@@ -5,7 +5,7 @@ import mgclient
 
 def import_data(cursor):
     df = pd.read_csv('relationship.csv')
-    for i, *_, a_id, type, b_id, category, _, notes in df.itertuples():
+    for i, *_, a_id, type, b_id, category, reference, notes in df.itertuples():
         kwargs = dict(
             a_id=a_id,
             b_id=b_id,
@@ -13,6 +13,7 @@ def import_data(cursor):
             b_name=b_id.rsplit('_', 1)[0],
             type=type,
             category=category,
+            reference=reference,
             notes=notes.replace('"', '`') if notes is not np.nan else ''
         )
         cursor.execute(import_query, kwargs)
@@ -24,7 +25,7 @@ set a.name = $a_name
 merge (b: Person {id: $b_id})
 set b.name = $b_name
 create (a) - [:RELATIONSHIP {
-    type: $type, category: $category, notes: $notes
+    type: $type, category: $category, notes: $notes, reference: $reference
 }] -> (b)
 """
 
