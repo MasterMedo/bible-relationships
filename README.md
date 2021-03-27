@@ -5,7 +5,7 @@ That has kept me from being immersed in the story as I would often find myself g
 Recently, I've discovered this gem of a dataset and wanted to explore it.
 Memgraph turned out to be a great fit for analysing the data.
 In the first part of this article we'll answer some commonly asked questions using a graph database.
-In the second part you can find the step by step process of how to explore your  own datasets; from the idea to the results.
+In the second part you can find the step by step process of how to explore your  own datasets; from idea to results.
 
 ## Frequently asked questions
 
@@ -31,14 +31,14 @@ MATCH path = ({name: "Adam_1"})-[* bfs (
 RETURN path
 ```
 ![](./img/adam-to-jacob.png)
-Jacob was the son Isaac, grandson of Abram.
+Jacob was the son of Isaac, grandson of Abram.
 He had twelve sons, all of whom became the heads of their own family groups, later known as the twelve tribes of Israel.
 
 ### Which tribe of Israel had the largest family?
 ```cypher
 MATCH ({name: "Jacob_1"})<-[{type: "son"}]-(son)
-match path = (son)-[* bfs (e, v | e.type = "father")]->(a)
-return son.name AS tribe, count(a) + 1 AS family_size
+MATCH path = (son)-[* bfs (e, v | e.type = "father")]->(a)
+RETURN son.name AS tribe, count(a) + 1 AS family_size
 ORDER BY family_size DESC
 ```
 | tribe | family_size |
