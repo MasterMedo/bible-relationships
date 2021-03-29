@@ -38,23 +38,26 @@ He had twelve sons, all of whom became the heads of their own family groups, lat
 ```cypher
 MATCH ({id: "Jacob_1"})<-[{type: "son"}]-(son)
 MATCH path = (son)-[* bfs (e, v | e.type = "father")]->(a)
-RETURN son.name AS tribe, count(a) + 1 AS family_size
-ORDER BY family_size DESC
+WITH son.name as tribe, count(a) + 1 AS size_by_blood
+OPTIONAL MATCH (person)
+WHERE person.tribe in CASE tribe WHEN "Joseph" THEN ["Manasseh", "Ephraim"] ELSE [tribe] END
+RETURN tribe, size_by_blood, count(person) AS size_by_marriage
+ORDER BY size_by_blood DESC, size_by_marriage DESC
 ```
-| tribe | family_size |
-| -------- | --- |
-| Judah    | 163 |
-| Levi     | 110 |
-| Benjamin | 101 |
-| Joseph   |  49 |
-| Asher    |  41 |
-| Issachar |  17 |
-| Simeon   |  15 |
-| Reuben   |   9 |
-| Gad      |   8 |
-| Naphtali |   5 |
-| Zebulun  |   4 |
-| Dan      |   2 |
+| tribe | size_by_blood | size_by_marriage |
+| ----- | ------------- | ---------------- |
+| Judah    | 163 | 294 |
+| Levi     | 110 | 323 |
+| Benjamin | 101 | 189 |
+| Joseph   |  49 |  95 |
+| Asher    |  41 |  47 |
+| Issachar |  17 |  26 |
+| Simeon   |  15 |  38 |
+| Reuben   |   9 |  34 |
+| Gad      |   8 |  44 |
+| Naphtali |   5 |  13 |
+| Zebulun  |   4 |  13 |
+| Dan      |   2 |  14 |
 
 ```cypher
 MATCH ({id: "Jacob_1"})<-[{type: "son"}]-(son)
