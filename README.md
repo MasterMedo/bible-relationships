@@ -11,7 +11,7 @@ In the second part you can find the step by step process of how to explore your 
 
 ### What is the longest father bloodline path from Adam?
 ```cypher
-MATCH path = ({name: "Adam_1"})
+MATCH path = ({name: "Adam"})
     -[* {type: "father"} ]->
     ()
 RETURN path
@@ -25,8 +25,8 @@ That is one of the charms of dealing with live data.
 
 ### What was the family tree of Adam excluding Israel (Jacob)?
 ```cypher
-MATCH path = ({name: "Adam_1"})-[* bfs (
-  e, v | v.name != "Jacob_1" and e.type = "father"
+MATCH path = ({id: "Adam_1"})-[* bfs (
+  e, v | v.id != "Jacob_1" and e.type = "father"
 )]->()
 RETURN path
 ```
@@ -36,7 +36,7 @@ He had twelve sons, all of whom became the heads of their own family groups, lat
 
 ### Which tribe of Israel had the largest family?
 ```cypher
-MATCH ({name: "Jacob_1"})<-[{type: "son"}]-(son)
+MATCH ({id: "Jacob_1"})<-[{type: "son"}]-(son)
 MATCH path = (son)-[* bfs (e, v | e.type = "father")]->(a)
 RETURN son.name AS tribe, count(a) + 1 AS family_size
 ORDER BY family_size DESC
@@ -57,7 +57,7 @@ ORDER BY family_size DESC
 | Dan      |   2 |
 
 ```cypher
-MATCH ({name: "Jacob_1"})<-[{type: "son"}]-(son)
+MATCH ({id: "Jacob_1"})<-[{type: "son"}]-(son)
 MATCH path = (son)-[* bfs (e, v | e.type = "father")]->(a)
 RETURN path
 ```
@@ -94,8 +94,8 @@ create RELATIONSHIP "Creator" between them
 
 In cypher that looks like this:
 ```cypher
-MERGE (a: Person {name: "G-d_1"})
-MERGE (b: Person {name: "Adam_1"})
+MERGE (a: Person {id: "G-d_1"})
+MERGE (b: Person {id: "Adam_1"})
 CREATE (a)-[r: RELATIONSHIP {type: "Creator"}]->(b)
 ```
 
@@ -112,8 +112,8 @@ Cain_1:Adam_1:5,5,Cain_1,son,Adam_1,explicit,GEN 4:1,
 Inserting into the database
 ```cypher
 LOAD CSV FROM '/relationship.csv' WITH HEADER AS row
-MERGE (a: Person {name: row.person_id_1})
-MERGE (b: Person {name: row.person_id_2})
+MERGE (a: Person {id: row.person_id_1})
+MERGE (b: Person {id: row.person_id_2})
 CREATE (a) - [:RELATIONSHIP {
   type: row.relationship_type,
   category: row.relationship_category,
@@ -149,7 +149,7 @@ I've reported the errors to the author but in the mean time we can make these ch
 We can do that with cypher or change the data directly in the csv.
 
 ```cypher
-MATCH (g {name: "G-d_1"})-[relationship]->(adam {name: "Adam_1"})
+MATCH (g {id: "G-d_1"})-[relationship]->(adam {id: "Adam_1"})
 CREATE (adam)-[new_relationship: RELATIONSHIP]->(g)
 SET new_relationship=relationship
 SET new_relationship.type="created by";
