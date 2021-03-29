@@ -1,15 +1,25 @@
-# Exploring hebrew [bible relationships](https://data.world/bradys/bibledata-personrelationship) with [memgraph](https://memgraph.com)
+# Exploring the Hebrew [Bible relationships](https://data.world/bradys/bibledata-personrelationship) with [Memgraph](https://memgraph.com)
 
-Reading the bible I recall struggling to remember relationships between persons and where to find references to them in the bible.
+Reading the Bible I recall struggling to remember relationships between persons and where to find references to them in the Bible.
 That has kept me from being immersed in the story as I would often find myself guessing who is who to whom.
 Recently, I've discovered this gem of a dataset and wanted to explore it.
 Memgraph turned out to be a great fit for analysing the data.
 In the first part of this article we'll answer some commonly asked questions using a graph database.
-In the second part you can find the step by step process of how to explore your  own datasets; from idea to results.
+In the second part you can find the step by step process of how to explore your own datasets; from idea to results.
 
 ## Frequently asked questions
 
+Every question in this section will be followed by:
+  - a short description
+  - an image from [MemgraphLab](https://memgraph.com/download#Lab-download) (Memgraph's default data browser)
+  - a [cypher query](https://neo4j.com/developer/cypher/) (SQL-like declarative query language for graph databases)
+
 ### What is the longest father bloodline path from Adam?
+The image shows the longest father-line path from Adam (created by G-d) all the way to Jotham, the son of Azariah.
+We can see that our dataset is incomplete since the family tree of Uzziah, son of Amaziah, should be longer (all the way to Yeshua).
+The Amaziah -> Uzziah relationship is first noted in the second book of Chronicles 26:1, but the dataset is up to 2CH 20.
+This is one of the charms of dealing with live data.
+![](./img/longest-bloodline.png)
 ```cypher
 MATCH path = ({name: "Adam"})
     -[* {type: "father"} ]->
@@ -18,32 +28,27 @@ RETURN path
 ORDER BY size(path) DESC
 LIMIT 1
 ```
-![](./img/longest-bloodline.png)
 
-We can see that our dataset is incomplete as the bloodline ends with *Jotham*, even though he had a son.
-That is one of the charms of dealing with live data.
+### What is the family tree of Adam excluding Israel (Jacob)?
+The image shows Adams family tree up to Jacob, the son of Isaac, grandson of Abram.
+Do note that apart from the families of Jacob; Moabites, Ammonites (sons of Lot), and other tribes were also present in later parts of the old testament.
+Female nodes in the graph are coloured orange, and male nodes are coloured red.
 
-### What was the family tree of Adam excluding Israel (Jacob)?
+![](./img/adam-to-jacob.png)
 ```cypher
 MATCH path = ({id: "Adam_1"})-[* bfs (
-  e, v | v.id != "Jacob_1" and e.type = "father"
+  e, v | v.id != "Jacob_1" AND e.type = "father"
 )]->()
 RETURN path
 ```
-![](./img/adam-to-jacob.png)
-Jacob was the son of Isaac, grandson of Abram.
-He had twelve sons, all of whom became the heads of their own family groups, later known as the twelve tribes of Israel.
 
 ### Which tribe of Israel had the largest family?
-```cypher
-MATCH ({id: "Jacob_1"})<-[{type: "son"}]-(son)
-MATCH path = (son)-[* bfs (e, v | e.type = "father")]->(a)
-WITH son.name as tribe, count(a) + 1 AS size_by_blood
-OPTIONAL MATCH (person)
-WHERE person.tribe in CASE tribe WHEN "Joseph" THEN ["Manasseh", "Ephraim"] ELSE [tribe] END
-RETURN tribe, size_by_blood, count(person) AS size_by_marriage
-ORDER BY size_by_blood DESC, size_by_marriage DESC
-```
+Jacob had twelve sons, all of whom became the heads of their own family groups, later known as the twelve tribes of Israel.
+The tribe of Joseph split into two half-tribes: the tribe of Manasseh and the tribe of Ephraim.
+In the following table we can see the size of each tribe up to the second book of Chronicles.
+`size_by_blood` is calculated by counting all the nodes we can reach from the sons of Jacob using only the *father* relationships.
+`size_by_marriage` is calculated by counting all the instances in the Bible where a person is explicitly noted to be a part of a certain tribe.
+
 | tribe | size_by_blood | size_by_marriage |
 | ----- | ------------- | ---------------- |
 | Judah    | 163 | 294 |
@@ -62,16 +67,27 @@ ORDER BY size_by_blood DESC, size_by_marriage DESC
 ```cypher
 MATCH ({id: "Jacob_1"})<-[{type: "son"}]-(son)
 MATCH path = (son)-[* bfs (e, v | e.type = "father")]->(a)
-RETURN path
+WITH son.name as tribe, count(a) + 1 AS size_by_blood
+OPTIONAL MATCH (person)
+WHERE person.tribe in CASE tribe WHEN "Joseph" THEN ["Manasseh", "Ephraim"] ELSE [tribe] END
+RETURN tribe, size_by_blood, count(person) AS size_by_marriage
+ORDER BY size_by_blood DESC, size_by_marriage DESC
 ```
-![](./img/tribes-of-israel.png)
+
+The image shows the twelve tribes of Israel up to 2CH 20:1 by father bloodline.
 Can you guess which family tree belongs to whom?
 Help yourself with the table provided above!
+![](./img/tribes-of-israel.png)
+```cypher
+MATCH ({id: "Jacob_1"})<-[{type: "son"}]-(son)
+MATCH path = (son)-[* bfs (e, v | e.type = "father")]->(a)
+RETURN path
+```
 
 # From idea to results
 
 ## Inserting data into a graph database
-Each line in the raw [dataset](https://data.world/bradys/bibledata-personrelationship) by [Brady Stepheson](https://data.world/bradys) contains information about the relationship between two persons and the reference to the bible verse.
+Each line in the raw [dataset](https://data.world/bradys/bibledata-personrelationship) by [Brady Stepheson](https://data.world/bradys) contains information about the relationship between two persons and the reference to the Bible verse.
 
 Cleaned dataset excerpt:
 ```
@@ -125,6 +141,7 @@ CREATE (a) - [:RELATIONSHIP {
 }] -> (b)
 ```
 
+Additionally we can add name, surname, sex, tribe and other metadata to each person using the [persons dataset](https://data.world/bradys/bibledata-person).
 ```cypher
 LOAD CSV FROM "/person.csv" WITH HEADER AS row
 MERGE (node: Person {id: row.person_id})
@@ -171,7 +188,7 @@ SET new_relationship.type="created by";
 ```
 
 ### Using domain knowledge
-If you have read the bible some things might come out to you as odd straight away.
+If you have read the Bible some things might come out to you as odd straight away.
 For example, when I was executing the queries in the first part of the article I noticed that *Benjamin* was the son of *Joseph* and *Rachel*, but I know that can't be right since *Joseph* is the brother of *Benjamin*.
 Also, I have noticed that *Nahshon_1* and *Nahshon_2* must be the same person as there was no clear bloodline from *Adam* to *David*!
 In general for these kinds of observations you will usually need someone who is an expert in the field.
