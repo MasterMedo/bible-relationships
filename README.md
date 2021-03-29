@@ -122,6 +122,18 @@ CREATE (a) - [:RELATIONSHIP {
 }] -> (b)
 ```
 
+```cypher
+LOAD CSV FROM "/person.csv" WITH HEADER AS row
+MERGE (node: Person {id: row.person_id})
+SET node += {
+  name: row.person_name,
+  surname: row.surname,
+  sex: row.sex,
+  tribe: row.tribe,
+  notes: row.person_notes
+}
+```
+
 ## Testing data integrity
 ### Ad hoc
 #### Every outgoing edge has to be paired with a matching incoming edge
