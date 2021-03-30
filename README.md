@@ -38,7 +38,7 @@ Every question in this section will be followed by:
 In the Bible, family and tribal membership appears to be transmitted through the father.
 Which is why this seems like a sane question to ask.
 The image shows the longest agnatic kinship path from Adam (created by G-d) all the way to Jotham, the son of Azariah.
-Here the incompleteness of our dataset becomes obvious since the family tree of Uzziah, son of Amaziah, should be longer (all the way to Yeshua) than of his brother Azariah.
+Here the incompleteness of our dataset becomes obvious since the family tree of Uzziah, son of Amaziah, should be longer than of his brother Azariah (all the way to Yeshua).
 The Amaziah -> Uzziah relationship is first noted in the second book of Chronicles 26:1, which is why it is not included.
 This is one of the charms of dealing with live data.
 ![](./img/longest-bloodline.png)
@@ -52,7 +52,7 @@ LIMIT 1
 ```
 
 ### What is the family tree of Adam excluding Israel (Jacob)?
-Drawing the whole family tree in the Bible would be a hefty job.
+Drawing the whole family tree from the Bible would be a hefty job.
 Since only the tribe of Israel is covered so far we can make a cut-off there and see what the family tree looked like in the book of Genesis.
 The image shows Adams family tree up to Jacob, the son of Isaac, grandson of Abram.
 Do note that apart from the families of Jacob; Moabites, Ammonites (sons of Lot), and other tribes were also present in later parts of the old testament.
@@ -67,7 +67,7 @@ RETURN path
 ```
 
 ### Which tribe of Israel had the largest family?
-Jacob had twelve sons, all of whom became the heads of their own family groups, later known as the twelve tribes of Israel.
+Jacob had twelve sons, all of whom became the heads of their own family groups, later known as the [Twelve Tribes of Israel](https://en.wikipedia.org/wiki/Twelve_Tribes_of_Israel).
 The tribe of Joseph split into two half-tribes: the tribe of Manasseh and the tribe of Ephraim.
 In the following table we can see the size of each tribe up to the second book of Chronicles.
 `size_by_blood` is calculated by counting all the nodes we can reach from the sons of Jacob using only the *father* relationships.
@@ -102,7 +102,7 @@ RETURN tribe, size_by_blood, count(person) AS size_by_marriage
 ORDER BY size_by_blood DESC, size_by_marriage DESC
 ```
 
-The image shows the spear side of the twelve tribes of Israel up to 2CH 20:1.
+The image shows the spear side of the Twelve Tribes of Israel up to 2CH 20:1.
 Can you guess which family tree belongs to whom?
 Help yourself with the table provided above!
 ![](./img/tribes-of-israel.png)
@@ -115,9 +115,7 @@ RETURN path
 # From idea to results
 
 ## Inserting data into a graph database
-Each line in the raw [dataset](https://data.world/bradys/bibledata-personrelationship) by [Brady Stepheson](https://data.world/bradys) contains information about the relationship between two persons and the reference to the Bible verse.
-
-Cleaned dataset excerpt:
+Each line in the raw [dataset](https://data.world/bradys/bibledata-personrelationship) by [Brady Stepheson](https://data.world/bradys) contains information about the relationship between two persons and the reference to the Bible verse. Here we show a cleaned dataset excerpt:
 ```
 person_id_1,relationship,person_id_2,reference
 G-d_1,Creator,Adam_1,GEN 2:7
@@ -127,7 +125,7 @@ Adam_1,father,Cain_1,GEN 4:1
 Cain_1,son,Adam_1,GEN 4:1
 ```
 
-We want to turn that data into something like:
+We want to turn that data into a graph, where nodes of the graph represent persons from the Bible and edges represent relationships between them. In the image below we can see the graph of the excerpt given above:
 
 ![](./img/graph-excerpt.png)
 
@@ -147,7 +145,7 @@ CREATE (a)-[r: RELATIONSHIP {type: "Creator"}]->(b)
 ```
 
 ### Real data
-In reality the data is a little more complex. Which is a good thing, since we can gather more information out of it. Here is an excerpt of the original data.
+In reality the data is a little more complex. Which is a good thing, since we can gather more information out of it. Here is an excerpt of the original data:
 ```
 person_relationship_id,person_relationship_sequence,person_id_1,relationship_type,person_id_2,relationship_category,reference_id,relationship_notes
 G-d_1:Adam_1:1,1,G-d_1,Creator,Adam_1,explicit,GEN 2:7,
@@ -157,7 +155,7 @@ Adam_1:Cain_1:4,4,Adam_1,father,Cain_1,explicit,GEN 4:1,
 Cain_1:Adam_1:5,5,Cain_1,son,Adam_1,explicit,GEN 4:1,
 ```
 
-The way we load this data into Memgraph is using a `LOAD CSV` expression.
+The preferred way of loading such data into Memgraph is using a `LOAD CSV` expression.
 ```cypher
 LOAD CSV FROM '/relationship.csv' WITH HEADER AS row
 MERGE (a: Person {id: row.person_id_1})
@@ -181,6 +179,10 @@ SET node += {
   notes: row.person_notes
 }
 ```
+
+This brings us to the data model described at the beginning of the article.
+A step beyond would be modelling the data into nodes of type *Person*,*Reference* and *Relationship* with appropriate edges between them.
+That way we could add cross reference relationships and possibly have a better chance of extracting implicit relationships programmatically.
 
 ## Testing data integrity
 ### Without domain specific knowledge
