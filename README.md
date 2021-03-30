@@ -220,7 +220,8 @@ In those cases you'll have to accept small discrepancies between the data and th
 
 ## Conclusion
 This has been a concise how-to guide on exploring real world data with all the charms that go with it.
-Hope you enjoyed reading it as much as we enjoyed writing it.
-The dataset will continue to be expanded so if you download the latest version you might get better results.
-Head over to the download page to start exploring your own datasets or play with one of our [own](https://playground.memgraph.com).
+We hope you enjoyed reading it as much as we enjoyed writing it.
+The dataset will continue to be expanded.
+Download the latest version and you might get better results.
+Head over to the download page to start exploring your own data or play with a plethora of datasets we [provide](https://playground.memgraph.com).
 Good luck and stay sharp!
