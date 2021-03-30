@@ -69,7 +69,11 @@ MATCH ({id: "Jacob_1"})<-[{type: "son"}]-(son)
 MATCH path = (son)-[* bfs (e, v | e.type = "father")]->(a)
 WITH son.name as tribe, count(a) + 1 AS size_by_blood
 OPTIONAL MATCH (person)
-WHERE person.tribe in CASE tribe WHEN "Joseph" THEN ["Manasseh", "Ephraim"] ELSE [tribe] END
+WHERE person.tribe IN
+CASE tribe
+  WHEN "Joseph" THEN ["Manasseh", "Ephraim"]
+  ELSE [tribe]
+END
 RETURN tribe, size_by_blood, count(person) AS size_by_marriage
 ORDER BY size_by_blood DESC, size_by_marriage DESC
 ```
@@ -133,21 +137,20 @@ Inserting into the database
 LOAD CSV FROM '/relationship.csv' WITH HEADER AS row
 MERGE (a: Person {id: row.person_id_1})
 MERGE (b: Person {id: row.person_id_2})
-CREATE (a) - [:RELATIONSHIP {
+CREATE (a)-[:RELATIONSHIP {
   type: row.relationship_type,
   category: row.relationship_category,
   notes: row.relationship_notes,
   reference: row.reference_id
-}] -> (b)
+}]->(b)
 ```
 
-Additionally we can add name, surname, sex, tribe and other metadata to each person using the [persons dataset](https://data.world/bradys/bibledata-person).
+Additionally we can add name, sex, tribe and other meta data to each person using the [persons dataset](https://data.world/bradys/bibledata-person).
 ```cypher
 LOAD CSV FROM "/person.csv" WITH HEADER AS row
 MERGE (node: Person {id: row.person_id})
 SET node += {
   name: row.person_name,
-  surname: row.surname,
   sex: row.sex,
   tribe: row.tribe,
   notes: row.person_notes
