@@ -2,18 +2,18 @@
 
 ### Introduction
 
-Reading the Bible I recall struggling to remember relationships between persons and where to find references to them in the Bible.
-That has kept me from being immersed in the story as I would often find myself guessing who is who to whom.
-Recently, I've discovered this gem of a dataset and wanted to explore it.
+Reading the Bible everyone struggles to remember relationships between persons and where to find references to them in the Bible.
+That keeps us from being immersed in the story as it's common to find oneself guessing who is who to whom.
+Recently, we've discovered this gem of a dataset and wanted to explore it.
 Memgraph turned out to be a great fit for analysing the data.
 In the first part of this article we'll answer some commonly asked questions using a graph database.
 In the second part you can find the step by step process of how to explore your own datasets; from idea to results.
 
 ### Data model
 The data collected by [Brady Stepheson](https://data.world/bradys) contains information about persons in the Bible and the relationships between them.
-The dataset is incomplete!
+Warning: the dataset is incomplete!
 At the time of writing the data is collected up to the second book of Chronicles, verse 20.
-If you want to know more about the format of data input data and how we imported it into Memgraph, hop to the second part of this article.
+If you want to know more about the format of input data and how we imported it into Memgraph, hop over to the second part of this article.
 
 Person:
   - id ["Adam_1", "Jotham_2", "Jotham_3", ...]
@@ -34,10 +34,12 @@ Every question in this section will be followed by:
   - an image from [MemgraphLab](https://memgraph.com/download#Lab-download) (Memgraph's default data browser)
   - a [cypher query](https://neo4j.com/developer/cypher/) (SQL-like declarative query language for graph databases)
 
-### What is the longest father bloodline path from Adam?
-The image shows the longest father-line path from Adam (created by G-d) all the way to Jotham, the son of Azariah.
-We can see that our dataset is incomplete since the family tree of Uzziah, son of Amaziah, should be longer (all the way to Yeshua).
-The Amaziah -> Uzziah relationship is first noted in the second book of Chronicles 26:1, but the dataset is up to 2CH 20.
+### What is the longest patrilineal descent from Adam?
+In the Bible, family and tribal membership appears to be transmitted through the father.
+Which is why this seems like a sane question to ask.
+The image shows the longest agnatic kinship path from Adam (created by G-d) all the way to Jotham, the son of Azariah.
+Here the incompleteness of our dataset becomes obvious since the family tree of Uzziah, son of Amaziah, should be longer (all the way to Yeshua) than of his brother Azariah.
+The Amaziah -> Uzziah relationship is first noted in the second book of Chronicles 26:1, which is why it is not included.
 This is one of the charms of dealing with live data.
 ![](./img/longest-bloodline.png)
 ```cypher
@@ -50,6 +52,8 @@ LIMIT 1
 ```
 
 ### What is the family tree of Adam excluding Israel (Jacob)?
+Drawing the whole family tree in the Bible would be a hefty job.
+Since only the tribe of Israel is covered so far we can make a cut-off there and see what the family tree looked like in the book of Genesis.
 The image shows Adams family tree up to Jacob, the son of Isaac, grandson of Abram.
 Do note that apart from the families of Jacob; Moabites, Ammonites (sons of Lot), and other tribes were also present in later parts of the old testament.
 Female nodes in the graph are coloured orange, and male nodes are coloured red.
@@ -98,7 +102,7 @@ RETURN tribe, size_by_blood, count(person) AS size_by_marriage
 ORDER BY size_by_blood DESC, size_by_marriage DESC
 ```
 
-The image shows the twelve tribes of Israel up to 2CH 20:1 by father bloodline.
+The image shows the spear side of the twelve tribes of Israel up to 2CH 20:1.
 Can you guess which family tree belongs to whom?
 Help yourself with the table provided above!
 ![](./img/tribes-of-israel.png)
@@ -143,6 +147,7 @@ CREATE (a)-[r: RELATIONSHIP {type: "Creator"}]->(b)
 ```
 
 ### Real data
+In reality the data is a little more complex. Which is a good thing, since we can gather more information out of it. Here is an excerpt of the original data.
 ```
 person_relationship_id,person_relationship_sequence,person_id_1,relationship_type,person_id_2,relationship_category,reference_id,relationship_notes
 G-d_1:Adam_1:1,1,G-d_1,Creator,Adam_1,explicit,GEN 2:7,
@@ -152,7 +157,7 @@ Adam_1:Cain_1:4,4,Adam_1,father,Cain_1,explicit,GEN 4:1,
 Cain_1:Adam_1:5,5,Cain_1,son,Adam_1,explicit,GEN 4:1,
 ```
 
-Inserting into the database
+The way we load this data into Memgraph is using a `LOAD CSV` expression.
 ```cypher
 LOAD CSV FROM '/relationship.csv' WITH HEADER AS row
 MERGE (a: Person {id: row.person_id_1})
@@ -200,7 +205,7 @@ G-d_1, Naamah_16, Naamah_1, Eve_3, Eve_1, Adam_1
 ```
 
 Upon closer inspection we can see that *Adam_1* is missing a *created by* edge towards *G-d_1*, and that *Naamah_16* and *Naamah_1* are the same person (same goes for *Eve's*).
-I've reported the errors to the author but in the mean time we can make these changes ourselves.
+We've reported the errors to the author but in the mean time we can make these changes ourselves.
 We can do that with cypher or change the data directly in the CSV file.
 
 ```cypher
@@ -212,8 +217,8 @@ SET new_relationship.type="created by";
 
 ### Using domain knowledge
 If you have read the Bible some things might come out to you as odd straight away.
-For example, when I was executing the queries in the first part of the article I noticed that *Benjamin* was the son of *Joseph* and *Rachel*, but I know that can't be right since *Joseph* is the brother of *Benjamin*.
-Also, I have noticed that *Nahshon_1* and *Nahshon_2* must be the same person as there was no clear bloodline from *Adam* to *David*!
+For example, when we were executing the queries in the first part of the article we noticed that *Benjamin* was the son of *Joseph* and *Rachel*, but that can't be right since *Joseph* was the brother of *Benjamin*.
+Also, we have noticed that *Nahshon_1* and *Nahshon_2* must be the same person as there was no clear bloodline from *Adam* to *David*!
 In general for these kinds of observations you will usually need someone who is an expert in the field.
 These methods won't work well if the number of entries is too big.
 In those cases you'll have to accept small discrepancies between the data and the truth.
