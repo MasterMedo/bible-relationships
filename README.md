@@ -15,6 +15,8 @@ Warning: the dataset is incomplete!
 At the time of writing the data is collected up to the second book of Chronicles, verse 20.
 If you want to know more about the format of input data and how we imported it into Memgraph, hop over to the second part of this article.
 
+![](./img/data-model.png)
+
 Person:
   - id ["Adam_1", "Jotham_2", "Jotham_3", ...]
   - name ["Adam", "Eve", "Jacob", ...]
