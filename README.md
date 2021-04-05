@@ -10,7 +10,7 @@ In the first part of this article we'll answer some commonly asked questions usi
 In the second part you can find the step by step process of how to explore your own datasets; from idea to results.
 
 ### Data model
-The data collected by [Brady Stepheson](https://data.world/bradys) contains information about persons in the Bible and the relationships between them.
+The data collected by [Brady Stephenson](https://data.world/bradys) contains information about persons in the Bible and the relationships between them.
 Warning: the dataset is incomplete!
 At the time of writing the data is collected up to the second book of Chronicles, verse 20.
 If you want to know more about the format of input data and how we imported it into Memgraph, hop over to the second part of this article.
