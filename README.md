@@ -117,7 +117,7 @@ RETURN path
 # From idea to results
 
 ## Inserting data into a graph database
-Each line in the raw [dataset](https://data.world/bradys/bibledata-personrelationship) by [Brady Stepheson](https://data.world/bradys) contains information about the relationship between two persons and the reference to the Bible verse. Here we show a cleaned dataset excerpt:
+Each line in the raw [dataset](https://data.world/bradys/bibledata-personrelationship) by [Brady Stephenson](https://data.world/bradys) contains information about the relationship between two persons and the reference to the Bible verse. Here we show a cleaned dataset excerpt:
 ```
 person_id_1,relationship,person_id_2,reference
 G-d_1,Creator,Adam_1,GEN 2:7
