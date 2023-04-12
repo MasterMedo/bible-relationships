@@ -111,7 +111,9 @@ ORDER BY size_by_blood DESC, size_by_marriage DESC
 The image shows the spear side of the Twelve Tribes of Israel up to 2CH 20:1.
 Can you guess which family tree belongs to whom?
 Help yourself with the table provided above!
-![query_result_visualization](https://public-assets.memgraph.com/exploring_interpersonal_relationships_in_the_bible/query_result_visualization.png)
+
+![tribes of israel](./img/tribes-of-israel.png)
+
 ```cypher
 MATCH ({id: "Jacob_1"})<-[{type: "son"}]-(son)
 MATCH path = (son)-[* bfs (e, v | e.type = "father")]->(a)
